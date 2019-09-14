@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block app_content %}
+<h3>{{ definition[0] }}</h3>
+<p>1. {{ choices[0] }}</p>
+<p>2. {{ choices[1] }}</p>
+<p>3. {{ choices[2] }}</p>
+<p>4. {{ choices[3] }}</p>
+<form method='POST' action='/quiz'>
+    <p><input name='answer' /></p>
+    <p><input type='submit' value='Next' /></p>
+</form>
+
+{% endblock %}

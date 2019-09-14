@@ -58,7 +58,6 @@ def quizsetup():
         flash(f'Quiz generated with {form.no_of_questions.data} Questions')
         no = form.no_of_questions.data
         questions = generate_questions(no)
-        global definition
         definition = get_definition(questions[0])
         choices = generate_choices(definition)
         return redirect(url_for('quiz'))
