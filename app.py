@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, render_template
 from processing import generate_questions, get_definition, generate_choices
 
 app = Flask(__name__)
@@ -50,17 +50,7 @@ def quizsetup():
         definition = get_definition(questions[0])
         choices = generate_choices(definition)
         return redirect('/quiz2')
-    return f'''
-        <html>
-            <body>
-                <p>How many questions?</p>
-                <form method='POST' action='/quizsetup'>
-                <p><input name='answer' /></p>
-                <p><input type='submit' value='Start'/></p>
-                </form>
-            </body>
-        </html>
-    '''
+    return render_template('quizsetup.html')
 
 
 @app.route('/quiz2', methods=['GET', 'POST'])
