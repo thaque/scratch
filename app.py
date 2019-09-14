@@ -1,8 +1,21 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, url_for, flash
 from processing import generate_questions, get_definition, generate_choices
+from flask_bootstrap import Bootstrap
+from config import Config
+from forms import QuizForm
+
 
 app = Flask(__name__)
+app.config.from_object(Config)
 app.config["DEBUG"] = True
+bootstrap = Bootstrap(app)
+user = {'username': 'Zarin'}
+
+
+@app.route('/')
+@app.route('/index')
+def index():
+    return render_template('base.html', title='Home', user=user)
 
 
 @app.route('/quizsetup', methods=['GET', 'POST'])
@@ -17,44 +30,50 @@ def quizsetup():
     score = 0
     count = 0
     answer = 0
-    if request.method == 'POST':
-        try:
-            no = int(request.form['answer'])
-        except:
-            return f'''
-                <html>
-                    <body>
-                        <p>How many questions?</p>
-                        <form method='POST' action='/quizsetup'>
-                        <p><input name='answer' /></p>
-                        <p><input type='submit' value='Start'/></p>
-                        </form>
-                        <p>Do you really think {request.form['answer']} is a valid response?</p>
-                    </body>
-                </html>
-                '''
-        if not no > 0:
-            return f'''
-                <html>
-                    <body>
-                        <p>How many questions?</p>
-                        <form method='POST' action='/quizsetup'>
-                        <p><input name='answer' /></p>
-                        <p><input type='submit' value='Start'/></p>
-                        </form>
-                        <p>Do you really think {request.form['answer']} is a valid response?</p>
-                    </body>
-                </html>
-                '''
+    form = QuizForm()
+    # if request.method == 'POST':
+    #     try:
+    #         no = form.no_of_questions.data
+    #     except:
+    #         message = f"Do you really think {request.form['answer']} is a valid response?"
+    #         return render_template('quizsetup.html')
+    #     if not no > 0:
+    #         return f'''
+    #             <html>
+    #                 <body>
+    #                     <p>How many questions?</p>
+    #                     <form method='POST' action='/quizsetup'>
+    #                     <p><input name='answer' /></p>
+    #                     <p><input type='submit' value='Start'/></p>
+    #                     </form>
+    #                     <p>Do you really think {request.form['answer']} is a valid response?</p>
+    #                 </body>
+    #             </html>
+    #             '''
+    #     questions = generate_questions(no)
+    #     definition = get_definition(questions[0])
+    #     choices = generate_choices(definition)
+    #     return redirect('/quiz')
+    if form.validate_on_submit():
+        flash(f'Quiz generated with {form.no_of_questions.data} Questions')
+        no = form.no_of_questions.data
         questions = generate_questions(no)
+        global definition
         definition = get_definition(questions[0])
         choices = generate_choices(definition)
-        return redirect('/quiz2')
-    return render_template('quizsetup.html')
+        return redirect(url_for('quiz'))
+        # return f'''
+        #     <html>
+        #         <body>
+        #             <p>{choices}</p>
+        #         </body>
+        #     </html>
+        # '''
+    return render_template('quizsetup.html', title='Quiz Setup', form=form, user=user)
 
 
-@app.route('/quiz2', methods=['GET', 'POST'])
-def quiz2():
+@app.route('/quiz', methods=['GET', 'POST'])
+def quiz():
     global count
     count += 1
     if request.method == 'POST':
@@ -71,7 +90,7 @@ def quiz2():
                     <p>2. {choices[1]}</p>
                     <p>3. {choices[2]}</p>
                     <p>4. {choices[3]}</p>
-                    <form method='POST' action='/quiz2'>
+                    <form method='POST' action='/quiz'>
                     <p><input name='answer' /></p>
                     <p><input type='submit' value='Next'/></p>
                     </form>
@@ -88,7 +107,7 @@ def quiz2():
                     <p>2. {choices[1]}</p>
                     <p>3. {choices[2]}</p>
                     <p>4. {choices[3]}</p>
-                    <form method='POST' action='/quiz2'>
+                    <form method='POST' action='/quiz'>
                     <p><input name='answer' /></p>
                     <p><input type='submit' value='Next'/></p>
                     </form>
@@ -98,21 +117,7 @@ def quiz2():
             '''
         return redirect('/checkanswer')
 
-    return f'''
-            <html>
-                <body>
-                    <h3>{definition[0]}</h3>
-                    <p>1. {choices[0]}</p>
-                    <p>2. {choices[1]}</p>
-                    <p>3. {choices[2]}</p>
-                    <p>4. {choices[3]}</p>
-                    <form method='POST' action='/quiz2'>
-                    <p><input name='answer' /></p>
-                    <p><input type='submit' value='Next'/></p>
-                    </form>
-                </body>
-            </html>
-        '''
+    return render_template('quiz.html', title='Quiz', user=user)
 
 
 @app.route('/checkanswer', methods=['GET', 'POST'])
@@ -152,7 +157,7 @@ def next():
         questions = questions[1:]
         definition = get_definition(questions[0])
         choices = generate_choices(definition)
-        return redirect('/quiz2')
+        return redirect('/quiz')
 
     return f'''
         <html>

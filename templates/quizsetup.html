@@ -1,15 +1,18 @@
-<html>
+{% extends 'base.html' %}
 
-<head>
-    <title>Zarin's Quiz App</title>
-</head>
-
-<body>
-    <p>How many questions?</p>
-    <form method='POST' action='/quizsetup'>
-        <p><input name='answer' /></p>
-        <p><input type='submit' value='Start' /></p>
-    </form>
-</body>
-
-</html>
+{% block app_content %}
+<form action='' method='POST' novalidate>
+    {{ form.hidden_tag() }}
+    <p>{{ form.no_of_questions.label }}<br>
+        {{ form.no_of_questions(size=32) }}
+        {% for error in form.no_of_questions.errors %}
+        <div class='alert alert-danger'><strong>{{ error }}</strong></div>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+<p>{{ message }}</p>
+{% if message %}
+<p>{{ message }}</p>
+{% endif %}
+{% endblock %}
